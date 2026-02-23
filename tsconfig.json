@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs" /* Node.js menggunakan CommonJS */,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "esModuleInterop": true /* Supaya bisa import module CommonJS dengan syntax 'import' */,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+
+    /* FIX UTAMA UNTUK ERROR KAMU */
+    "verbatimModuleSyntax": false /* Matikan ini agar tidak error syntax import/export */,
+    "moduleResolution": "node" /* Pastikan resolusi modul gaya Node */
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

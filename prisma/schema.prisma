@@ -1,0 +1,67 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+// TABEL 1: Identitas Penerbangan (Header)
+// Dibuat saat pesawat pertama kali terdeteksi masuk bounds
+model Flight {
+  fr24_id   String   @id // Primary Key pakai ID dari FR24
+  hex       String
+  callsign  String?
+  source    String?
+  
+  firstSeen DateTime @default(now()) // Kapan masuk bounds
+  lastSeen  DateTime @updatedAt      // Kapan terakhir terdeteksi (buat filter aktif/tidak)
+
+  // Relasi: Satu penerbangan punya BANYAK titik koordinat
+  points    FlightPoint[]
+}
+
+// TABEL 2: Log Pergerakan (Detail/History)
+// Data nambah terus tiap 6 detik per pesawat
+model FlightPoint {
+  id        BigInt   @id @default(autoincrement()) // Pakai BigInt karena data bakal jutaan
+  flightId  String
+  
+  lat       Float
+  lon       Float
+  track     Int
+  alt       Int
+  gspeed    Int
+  vspeed    Int
+  squawk    String?
+  timestamp DateTime
+
+  flight    Flight   @relation(fields: [flightId], references: [fr24_id], onDelete: Cascade)
+
+  @@index([flightId])   // Biar query history per pesawat cepat
+  @@index([timestamp])  // Biar filter waktu cepat
+}
+
+model Airport {
+  id        Int      @id @default(autoincrement())
+  name      String
+  code      String   @unique // Contoh: "CGK", "DPS" (Harus 3 huruf)
+  city      String
+  
+  // Data Teknis untuk keperluan Map & Tracking
+  bounds    String   // "north,south,west,east"
+  lat       Float    // Titik tengah bandara buat marker peta
+  lon       Float
+
+  createdAt DateTime @default(now())
+}
